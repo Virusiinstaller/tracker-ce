@@ -7,41 +7,21 @@
 
 void mtEffectEQ4::setParameter(float& value, int idx)
 {
-    const int band = idx / kParamsPerBand;
-    if (band < 0 || band >= kBands)
-    {
-        return;
-    }
-    switch (idx % kParamsPerBand)
-    {
-        case 0: freq[band] = value; break;
-        case 1: gain[band] = value; break;
-        default: q[band] = value; break;
-    }
+    // the band set arrives through setBands()
+    (void)value;
+    (void)idx;
 }
 
 bool mtEffectEQ4::startProcess()
 {
     length = confirmed[0].selection.length;
 
-    static const uint8_t kTypes[kBands] = { trackeq::kEqLowShelf,
-                                            trackeq::kEqPeak,
-                                            trackeq::kEqPeak,
-                                            trackeq::kEqHighShelf };
-
-    trackeq::TrackEqParams params;
+    trackeq::TrackEqParams params = bands;
     anyBandActive = false;
     for (int b = 0; b < kBands; ++b)
     {
-        trackeq::EqBand& band = params.band[b];
-        band.type = kTypes[b];
-        band.freqHz = (uint16_t)lroundf(freq[b]);
-        band.gainDb10 = (int16_t)lroundf(gain[b] * 10.0f);
-        band.q100 = (uint16_t)lroundf(q[b] * 100.0f);
-        band.slope = 0;
-        trackeq::eqSanitize(band);
-        band.on = band.gainDb10 != 0;
-        anyBandActive = anyBandActive || band.on;
+        trackeq::eqSanitize(params.band[b]);
+        anyBandActive = anyBandActive || trackeq::eqBandActive(params.band[b]);
     }
 
     for (int channel = 0; channel < kChannels; channel++)

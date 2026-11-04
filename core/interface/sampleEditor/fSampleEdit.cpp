@@ -68,6 +68,13 @@ static void functParamsScreenDelete();
 static void functSelectParameter(uint8_t button);
 static void functParamsScreenMore();
 static void functBack();
+static void functEqEncoder(int16_t value);
+static void functEqBandButton(uint8_t button);
+static void functEqUp();
+static void functEqDown();
+static void functEqLeft();
+static void functEqRight();
+static void functEqReset();
 static void functPreview();
 static void functPlay();
 static void functStop();
@@ -508,6 +515,12 @@ void cSampleEditor::setParamsScreenFunctions()
     if (mtProject.values.lastUsedInstrument > kSampleInstrumentsCount - 1)
         return;
 
+    if (isEq4())
+    {
+        setEqScreenFunctions();
+        return;
+    }
+
     ip->setButtonObj(interfaceButtonLeft, buttonPress, functParamsScreenLeft);
     ip->setButtonObj(interfaceButtonRight, buttonPress, functParamsScreenRight);
     ip->setButtonObj(interfaceButtonUp, buttonPress, functParamsScreenUp);
@@ -607,7 +620,14 @@ void cSampleEditor::switchScreen(enScreenType s)
     else if (s == effectScreen)
     {
         prepareDisplayDataParamsScreen();
-        showEffectParamsScreen();
+        if (isEq4())
+        {
+            showEqScreen();
+        }
+        else
+        {
+            showEffectParamsScreen();
+        }
         setParamsScreenFunctions();
     }
 }
@@ -2307,3 +2327,152 @@ char** cSampleEditor::getParameterListItems(uint8_t paramIdx) const
     return nullptr;
 }
 
+
+//**************************** EQ4 screen
+void cSampleEditor::setEqScreenFunctions()
+{
+    for (uint8_t i = interfaceButton0; i <= interfaceButton3; i++)
+    {
+        ip->setButtonObj(i, buttonPress, functEqBandButton);
+    }
+    ip->setButtonObj(interfaceButton4, buttonPress, functEqReset);
+    ip->setButtonObj(interfaceButtonLeft, buttonPress, functEqLeft);
+    ip->setButtonObj(interfaceButtonRight, buttonPress, functEqRight);
+    ip->setButtonObj(interfaceButtonUp, buttonPress, functEqUp);
+    ip->setButtonObj(interfaceButtonDown, buttonPress, functEqDown);
+    ip->setButtonObj(interfaceButtonDelete, buttonPress, functEqReset);
+
+    ip->setButtonObj(interfaceButton5, buttonPress, functBack);
+    switch (previewState)
+    {
+        case previewStatePreview:
+            ip->setButtonObj(interfaceButton6, buttonPress, functPreview);
+            break;
+        case previewStatePlay: ip->setButtonObj(interfaceButton6, buttonPress, functPlay); break;
+        case previewStateStop: ip->setButtonObj(interfaceButton6, buttonPress, functStop); break;
+    }
+    ip->setButtonObj(interfaceButton7, buttonPress, functSave);
+
+    ip->setPotObj(interfacePot0, functEqEncoder, false);
+}
+
+void cSampleEditor::eqCommit(const trackeq::TrackEqParams& p)
+{
+    sampleEditorEQ4.setBands(p);
+    currentEffect->clearProcessedData();
+    setPreviewFunction();
+}
+
+void cSampleEditor::eqSelectBand(int band)
+{
+    if (band < 0 || band >= trackeq::kEqBands)
+    {
+        return;
+    }
+    if (band == eqBand)
+    {
+        // pressing the selected band again switches it on or off
+        trackeq::TrackEqParams p = sampleEditorEQ4.getBands();
+        p.band[band].on = !p.band[band].on;
+        eqCommit(p);
+    }
+    else
+    {
+        eqBand = band;
+    }
+    refreshEqScreen();
+}
+
+void cSampleEditor::eqSelectParam(int param)
+{
+    eqParam = clamp(param, 0, 3);
+    refreshEqScreen();
+}
+
+void cSampleEditor::eqChangeValue(int steps, bool coarse)
+{
+    if (steps == 0)
+    {
+        return;
+    }
+    trackeq::TrackEqParams p = sampleEditorEQ4.getBands();
+    trackeq::EqBand& b = p.band[eqBand];
+
+    switch (eqParam)
+    {
+        case 0:
+            b.type = trackeq::eqStepType(b.type, steps > 0 ? 1 : -1);
+            if (!trackeq::eqSlopeAllowed(eqBand, b.type))
+            {
+                b.slope = 0;
+            }
+            break;
+        case 1: b.freqHz = trackeq::eqStepFreq(b.freqHz, steps, coarse); break;
+        case 2:
+            if (trackeq::eqSlopeAllowed(eqBand, b.type))
+            {
+                b.slope = b.slope ? 0 : 1; // 12 <-> 48 dB/oct
+            }
+            else if (trackeq::eqUsesGain(b.type))
+            {
+                b.gainDb10 = trackeq::eqStepGain(b.gainDb10, steps, coarse);
+            }
+            else
+            {
+                return;
+            }
+            break;
+        default: b.q100 = trackeq::eqStepQ(b.q100, steps, coarse); break;
+    }
+    b.on = true; // an edited band is audible at once
+    eqCommit(p);
+    refreshEqScreen();
+}
+
+void cSampleEditor::eqResetBand()
+{
+    trackeq::TrackEqParams p = sampleEditorEQ4.getBands();
+    p.band[eqBand] = trackeq::eqDefaultBand(eqBand);
+    eqCommit(p);
+    refreshEqScreen();
+}
+
+static bool eqShiftHeld()
+{
+    return ModuleBase::buttons->isButtonPressed(interfaceButtonShift);
+}
+
+static void functEqEncoder(int16_t value)
+{
+    SE->eqChangeValue(value, eqShiftHeld());
+}
+
+static void functEqBandButton(uint8_t button)
+{
+    SE->eqSelectBand(button);
+}
+
+static void functEqUp()
+{
+    SE->eqSelectParam(SE->eqParam - 1);
+}
+
+static void functEqDown()
+{
+    SE->eqSelectParam(SE->eqParam + 1);
+}
+
+static void functEqLeft()
+{
+    SE->eqSelectBand(SE->eqBand - 1);
+}
+
+static void functEqRight()
+{
+    SE->eqSelectBand(SE->eqBand + 1);
+}
+
+static void functEqReset()
+{
+    SE->eqResetBand();
+}

@@ -6,18 +6,27 @@
 #include "track_eq.h"
 
 /*
- * EQ4: four-band parametric equalizer (same filters as the per-track EQ).
+ * EQ4: four-band parametric equalizer (same filters and band model as the per-track EQ).
  *
- * Band 1 = low shelf, bands 2 and 3 = bell, band 4 = high shelf. Every band has three parameters
- * (idx = band * 3 + n): frequency [Hz], gain [dB, +-15] and Q. A band with 0 dB gain does nothing;
- * with all four at 0 dB the selection is copied unchanged.
+ * The bands are edited on the dedicated EQ4 screen of the Sample Editor (cSampleEditor), which
+ * hands the whole set over with setBands(). Every band has a type (bell, shelves, cuts, notch),
+ * frequency, gain, Q and an on/off flag; with all bands off the selection is copied unchanged.
  */
 class mtEffectEQ4 : public mtEffect
 {
   public:
-    static constexpr int kBands = 4;
-    static constexpr int kParamsPerBand = 3;
-    static constexpr int kParams = kBands * kParamsPerBand;
+    static constexpr int kBands = trackeq::kEqBands;
+
+    mtEffectEQ4()
+    {
+        for (int b = 0; b < kBands; ++b)
+        {
+            bands.band[b] = trackeq::eqDefaultBand(b);
+        }
+    }
+
+    void setBands(const trackeq::TrackEqParams& p) { bands = p; }
+    const trackeq::TrackEqParams& getBands() const { return bands; }
 
     virtual void setParameter(float& value, int idx) override;
     virtual bool startProcess() override;
@@ -29,9 +38,7 @@ class mtEffectEQ4 : public mtEffect
     static constexpr uint32_t kUpdateBlockLength = 8192;
     static constexpr uint32_t kChunk = 256;
 
-    float freq[kBands] = { 100.0f, 400.0f, 2500.0f, 8000.0f };
-    float gain[kBands] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    float q[kBands] = { 0.71f, 1.0f, 1.0f, 0.71f };
+    trackeq::TrackEqParams bands;
 
     struct ChannelParams
     {

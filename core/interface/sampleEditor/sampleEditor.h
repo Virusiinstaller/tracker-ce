@@ -2,6 +2,7 @@
 #define INTERFACE_SAMPLEEDITOR_H_
 
 #include "core/modulesBase.h"
+#include "mtEffectEQ4.h"
 #include "mtSampleEditorEngine.h"
 #include "mtStructs.h"
 #include "tracker_plugin.h"
@@ -152,14 +153,7 @@ const strEffectDisplayConstantParams effectDisplayConstantParams[editorEffectMax
       timestretchNoteParams::displayType },
     {}, // fade in  -  brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
-    { 12,
-      eq4Params::labelText,
-      eq4Params::upConstrain,
-      eq4Params::downConstrain,
-      eq4Params::changeStep,
-      eq4Params::displayMult,
-      eq4Params::afterValueText,
-      eq4Params::displayType },
+    {}, // eq4 - dedicated screen (graph + band editor), no parameter bars
     {}  // modular - dynamiczne parametry
 };
 
@@ -181,7 +175,7 @@ const strEffectDefaultParams effectDefaultParamsTable[editorEffectMax] = {
     { { 0.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },      // timestretch note
     {}, // fade in - brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
-    { { 100.0f, 0.0f, 0.71f, 400.0f, 0.0f, 1.0f, 2500.0f, 0.0f, 1.0f, 8000.0f, 0.0f, 0.71f } }, // eq4
+    {}, // eq4 - the band set lives in sampleEditorEQ4
     {}  // modular
 };
 
@@ -268,6 +262,19 @@ class cSampleEditor : public ModuleBase
     virtual void destroyDisplayControls() {}
     void showMainScreen();
     void showEffectParamsScreen();
+    //*******************
+    //*******************EQ4 SCREEN (graph + four-band editor, same layout as the Track EQ)
+    bool isEq4() const { return currentEffectIdx == editorEffectEQ4; }
+    void showEqScreen();
+    void refreshEqScreen();
+    void hideEqControls();
+    void setEqScreenFunctions();
+    void eqSelectBand(int band);
+    void eqSelectParam(int param);
+    void eqChangeValue(int steps, bool coarse);
+    void eqResetBand();
+    void eqCommit(const trackeq::TrackEqParams& p);
+    void eqShowBand(int i);
     //*******************
     //******************* GRAPHIC OPERATIONS
     void showTitleBar(const char* title);
@@ -390,8 +397,20 @@ class cSampleEditor : public ModuleBase
     hControl frame;
     hControl popupProgressBar;
     hControl bgLabel;
+    // EQ4 screen
+    hControl eqGraph = -1;
+    hControl eqHead[trackeq::kEqBands];
+    hControl eqValue[trackeq::kEqBands][4];
+    int eqBand = 0;
+    int eqParam = 1; // 0 type, 1 frequency, 2 gain / slope, 3 Q
 
     // DISPLAY CONTROLS DATA
+    strEqGraphData eqGraphData;
+    uint32_t eqGraphColors[4];
+    char eqHeadText[trackeq::kEqBands][10];
+    char eqValueText[trackeq::kEqBands][4][16];
+    char eqBottomText[8][8];
+    char eqBottomText2[8][8];
     strList effectListData;
     strList paramListData[kEffectPageParams];
     strLabelData labelDataMore;
