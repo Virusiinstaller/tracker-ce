@@ -55,6 +55,7 @@
 #include "effect_limiter.h"
 #include "effect_polyverb.h"
 #include "effect_shortDelay.h"
+#include "effect_trackEq.h"
 #include "filter_variable.h"
 #include "mixer.h"
 #include "monoToStereo.h"

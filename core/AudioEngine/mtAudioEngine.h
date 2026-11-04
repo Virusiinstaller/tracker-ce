@@ -11,6 +11,7 @@
 #include "Platform.h"
 #include "SdStream.h"
 #include "SynthVoice.h"
+#include "track_eq.h"
 #include "padToBeatNoteConverter.h"
 #include <bitset>
 #include <map>
@@ -64,6 +65,10 @@ class audioEngine
     void refreshOutputSourceOutsideTheRecorder();
     void forceUsbGainOutsideTheRecorder();
 #endif
+    // Per-track EQ (tracks 1-8). The set is the source of truth; the audio objects follow it.
+    void setTrackEq(int track, const trackeq::TrackEqParams& params);
+    void setTrackEqSet(const trackeq::TrackEqSet& set);
+    const trackeq::TrackEqSet& getTrackEqSet() const { return trackEqSet; }
     void refreshTrackVolume();
     void refreshReverbVolume();
     void refreshDelayVolume();
@@ -196,6 +201,7 @@ class audioEngine
     friend class playerEngine;
 
   private:
+    trackeq::TrackEqSet trackEqSet;
 #ifdef FEATURE_SYNTH
     void updateSynthParams();
     void updateSynthParam(int synthIdx, SynthParam param);

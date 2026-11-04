@@ -23,6 +23,7 @@
 #include "WorkspaceProjectSave.h"
 
 #include "PatternsMetadata.h"
+#include "TrackEqStore.h"
 
 #ifdef FEATURE_SYNTH
 #define FILEMANAGER_HANDLE_SYNTH 1
@@ -169,6 +170,7 @@ class cFileManager
     FileSystem* getFileSystem() { return fileSystem; }
     Synth* getSynth() { return synth; }
     PatternsMetadata* getPatternsMetadata() { return &patternsMetadata; }
+    TrackEqStore* getTrackEqStore() { return &trackEqStore; }
 
     void clearStatus()
     {
@@ -444,6 +446,7 @@ class cFileManager
     int loadedPattern = -1;  // -1 for asserts
 
     PatternsMetadata patternsMetadata;
+    TrackEqStore trackEqStore;
 
     bool stereoSampleMode = false;
 

@@ -30,6 +30,7 @@ class AudioVoice
     AudioPlayMemory* getMemoryPlayer();
     AudioBitDepth* getBitDepth();
     AudioFilterStateVariable* getFilter();
+    AudioEffectTrackEq* getTrackEq();
     AudioAmplifier* getAmplifier();
     MonoToStereo* getMonoToStereo();
     AudioAnalyzeRMS* getRMS();
@@ -37,6 +38,7 @@ class AudioVoice
     AudioPlayMemory* getMemoryPlayer(VoiceChannels channel);
     AudioBitDepth* getBitDepth(VoiceChannels channel);
     AudioFilterStateVariable* getFilter(VoiceChannels channel);
+    AudioEffectTrackEq* getTrackEq(VoiceChannels channel);
     AudioAmplifier* getAmplifier(VoiceChannels channel);
     AudioAmplifier* getPanningAmplifier(VoiceChannels channel);
     AudioAnalyzeRMS* getRMS(VoiceChannels channel);
@@ -48,6 +50,7 @@ class AudioVoice
     AudioPlayMemory memoryPlayer;
     AudioBitDepth bitDepth;
     AudioFilterStateVariable filter;
+    AudioEffectTrackEq trackEq;
     AudioAmplifier amplifier;
     MonoToStereo monoToStereo;
     AudioAnalyzeRMS rms;
@@ -55,6 +58,7 @@ class AudioVoice
     AudioPlayMemory memoryPlayer[VoiceChannels::kChannelsCount];
     AudioBitDepth bitDepth[VoiceChannels::kChannelsCount];
     AudioFilterStateVariable filter[VoiceChannels::kChannelsCount];
+    AudioEffectTrackEq trackEq[VoiceChannels::kChannelsCount];
     AudioAmplifier amplifier[VoiceChannels::kChannelsCount];
     AudioAmplifier panningAmplifier[VoiceChannels::kChannelsCount];
     AudioAnalyzeRMS rms[VoiceChannels::kChannelsCount];

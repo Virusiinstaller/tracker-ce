@@ -165,6 +165,7 @@ void WorkspaceProjectLoad::loadProjectFromWorkspaceFinish()
     newFileManager.startAudioEngine();
 
     newFileManager.getPatternsMetadata()->loadPatternsMetadata();
+    newFileManager.getTrackEqStore()->loadFromWorkspace();
 
 #if FILEMANAGER_HANDLE_SYNTH == 1
     newFileManager.getSynth()->updateToSettings(mtProject.values, true);

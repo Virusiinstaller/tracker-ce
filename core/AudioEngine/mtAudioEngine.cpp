@@ -343,12 +343,12 @@ void audioEngine::connectVoiceToMixer(AudioVoice* voice, MixerAndFxs<kVoices>* m
                           mixerAndFxs->getTracksMixer(MixerAndFxChannelType::kRight),
                           idx));
     connections.push_back(
-      new AudioConnection(voice->getFilter(),
+      new AudioConnection(voice->getTrackEq(),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kReverb),
                           idx));
     connections.push_back(
-      new AudioConnection(voice->getFilter(),
+      new AudioConnection(voice->getTrackEq(),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kDelay),
                           idx));
@@ -369,23 +369,23 @@ void audioEngine::connectVoiceToMixer(AudioVoice* voice, MixerAndFxs<kVoices>* m
                           idx));
 
     connections.push_back(
-      new AudioConnection(voice->getFilter(AudioVoice::VoiceChannels::kLeft),
+      new AudioConnection(voice->getTrackEq(AudioVoice::VoiceChannels::kLeft),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kReverb),
                           idx));
     connections.push_back(
-      new AudioConnection(voice->getFilter(AudioVoice::VoiceChannels::kRight),
+      new AudioConnection(voice->getTrackEq(AudioVoice::VoiceChannels::kRight),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kReverb),
                           kVoices + kInputsChannels + idx));
 
     connections.push_back(
-      new AudioConnection(voice->getFilter(AudioVoice::VoiceChannels::kLeft),
+      new AudioConnection(voice->getTrackEq(AudioVoice::VoiceChannels::kLeft),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kDelay),
                           idx));
     connections.push_back(
-      new AudioConnection(voice->getFilter(AudioVoice::VoiceChannels::kRight),
+      new AudioConnection(voice->getTrackEq(AudioVoice::VoiceChannels::kRight),
                           0,
                           mixerAndFxs->getPreFxMixer(MixerAndFxs<kVoices>::FxType::kDelay),
                           kVoices + kInputsChannels + idx));
