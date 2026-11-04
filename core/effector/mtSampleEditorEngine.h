@@ -21,6 +21,7 @@ enum enSampleEditorEffect
     editorEffectTimestretchNote,
     editorEffectFadeIn,
     editorEffectFadeOut,
+    editorEffectEQ4,
     editorEffectModular,
 
     //**********************//
@@ -125,6 +126,17 @@ extern float changeStep[9];
 extern float displayMult[9];
 extern const char* const afterValueText[9];
 extern const char displayType[9];
+}
+
+namespace eq4Params
+{
+extern const char* const labelText[12];
+extern float upConstrain[12];
+extern float downConstrain[12];
+extern float changeStep[12];
+extern float displayMult[12];
+extern const char* const afterValueText[12];
+extern const char displayType[12];
 }
 
 namespace limiterParams

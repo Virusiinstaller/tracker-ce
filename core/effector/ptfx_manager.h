@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 static constexpr uint16_t kMaxModularPlugins = 128;
-static constexpr uint16_t kBuiltInEffectsCount = 17;
+static constexpr uint16_t kBuiltInEffectsCount = 18;
 
 struct PtfxEntry
 {

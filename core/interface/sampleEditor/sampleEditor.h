@@ -17,7 +17,8 @@ char* const effectNamesLabels[editorEffectMax] = {
     (char*)"Limiter",          (char*)"Compressor",
     (char*)"WT Smoother",      (char*)"Timestretch Beat",
     (char*)"Timestretch Note", (char*)"Fade In",
-    (char*)"Fade Out",         (char*)"Modular"
+    (char*)"Fade Out",         (char*)"EQ4",
+    (char*)"Modular"
 };
 
 struct strEffectDisplayParams
@@ -151,6 +152,14 @@ const strEffectDisplayConstantParams effectDisplayConstantParams[editorEffectMax
       timestretchNoteParams::displayType },
     {}, // fade in  -  brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
+    { 12,
+      eq4Params::labelText,
+      eq4Params::upConstrain,
+      eq4Params::downConstrain,
+      eq4Params::changeStep,
+      eq4Params::displayMult,
+      eq4Params::afterValueText,
+      eq4Params::displayType },
     {}  // modular - dynamiczne parametry
 };
 
@@ -172,6 +181,7 @@ const strEffectDefaultParams effectDefaultParamsTable[editorEffectMax] = {
     { { 0.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },      // timestretch note
     {}, // fade in - brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
+    { { 100.0f, 0.0f, 0.71f, 400.0f, 0.0f, 1.0f, 2500.0f, 0.0f, 1.0f, 8000.0f, 0.0f, 0.71f } }, // eq4
     {}  // modular
 };
 

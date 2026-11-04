@@ -7,6 +7,7 @@
 #include "mtEffectCut.h"
 #include "mtEffectDelay.h"
 #include "mtEffectEQ.h"
+#include "mtEffectEQ4.h"
 #include "mtEffectFadeIn.h"
 #include "mtEffectFadeOut.h"
 #include "mtEffectFlanger.h"
@@ -35,6 +36,7 @@ mtEffect* sampleEditorEffect[editorEffectMax] = { &sampleEditorNormalizer,
                                                   &sampleEditorTimestretchNote,
                                                   &sampleEditorFadeIn,
                                                   &sampleEditorFadeOut,
+                                                  &sampleEditorEQ4,
                                                   &sampleEditorModular };
 
 //******************************DELAY
@@ -151,6 +153,26 @@ float displayMult[9] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 const char* const afterValueText[9] = { " dB", " Hz", "", " dB", " Hz", "", " dB", " Hz", "" };
 const char displayType[9] = { 'f', 'd', 'f', 'f', 'd', 'f', 'f', 'd', 'f' };
+}
+
+namespace eq4Params
+{
+const char* const labelText[12] = {
+    (const char* const)"Low freq",   (const char* const)"Low gain",   (const char* const)"Low Q",
+    (const char* const)"LoMid freq", (const char* const)"LoMid gain", (const char* const)"LoMid Q",
+    (const char* const)"HiMid freq", (const char* const)"HiMid gain", (const char* const)"HiMid Q",
+    (const char* const)"High freq",  (const char* const)"High gain",  (const char* const)"High Q"
+};
+float upConstrain[12] = { 1000.0f, 15.0f, 5.0f,  8000.0f,  15.0f, 10.0f,
+                          16000.0f, 15.0f, 10.0f, 20000.0f, 15.0f, 5.0f };
+float downConstrain[12] = { 20.0f,  -15.0f, 0.3f, 50.0f,   -15.0f, 0.3f,
+                            200.0f, -15.0f, 0.3f, 1000.0f, -15.0f, 0.3f };
+float changeStep[12] = { 5.0f,  0.1f, 0.05f, 10.0f, 0.1f, 0.05f,
+                         50.0f, 0.1f, 0.05f, 100.0f, 0.1f, 0.05f };
+float displayMult[12] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+const char* const afterValueText[12] = { " Hz", " dB", "", " Hz", " dB", "",
+                                         " Hz", " dB", "", " Hz", " dB", "" };
+const char displayType[12] = { 'd', 'f', 'f', 'd', 'f', 'f', 'd', 'f', 'f', 'd', 'f', 'f' };
 }
 
 namespace limiterParams

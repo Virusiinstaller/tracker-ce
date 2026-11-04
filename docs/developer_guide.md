@@ -126,7 +126,7 @@ Full details in [`docs/custom_synth_sdk.md`](custom_synth_sdk.md).
 Full details in [`docs/modular_effects_system.md`](modular_effects_system.md).
 
 * **Plugin & Parameter Limits**:
-  * Up to **128 `.ptfx` plugins** (`kMaxModularPlugins = 128` in [`core/effector/ptfx_manager.h`](../core/effector/ptfx_manager.h)) are indexed from `/Effects/` alongside the **17 built-in** Sample Editor effects (`kBuiltInEffectsCount = 17`, `145` total list items in `s_effectDisplayNames`).
+  * Up to **128 `.ptfx` plugins** (`kMaxModularPlugins = 128` in [`core/effector/ptfx_manager.h`](../core/effector/ptfx_manager.h)) are indexed from `/Effects/` alongside the **18 built-in** Sample Editor effects (`kBuiltInEffectsCount = 18`, `146` total list items in `s_effectDisplayNames`).
   * Each `.ptfx` plugin supports up to **12 parameters** (`PtfxHeader::params[12]` in [`core/effector/tracker_plugin.h`](../core/effector/tracker_plugin.h) and [`editor-fx-sdk/tracker_plugin.h`](../editor-fx-sdk/tracker_plugin.h)), displayed in the Sample Editor across up to 3 pages of 4 parameters via the `More` screen button.
 * **`.ptfx` Code+BSS Limits (`32 KB` on MK66 vs `128 KB` on IMX)**:
   * Both platforms execute `.ptfx` plugin code from the base of `externalRamScratchBuff` (`[0 .. 32 KB]` on Original Tracker `MK66` with the Kinetis System MPU disabled via `MPU_CESR = 0`, and `[0 .. 128 KB]` on Tracker+ / Tracker Mini `IMX` after cleaning L1 D-Cache and invalidating I-Cache in `PtfxLoader::syncInstructionCache()`).
