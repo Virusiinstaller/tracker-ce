@@ -208,43 +208,11 @@ void cTrackEqEditor::resetBand()
 }
 
 //----------------------------------------------------------------------------------------------
-static void formatFreq(int hz, char* out, int cap)
-{
-    if (hz < 1000)
-    {
-        snprintf(out, cap, "%d Hz", hz);
-    }
-    else
-    {
-        snprintf(out, cap, "%d.%02d kHz", hz / 1000, (hz % 1000) / 10);
-    }
-}
-
-static void formatGain(const trackeq::EqBand& b, int index, char* out, int cap)
-{
-    if (trackeq::eqSlopeAllowed(index, b.type))
-    {
-        snprintf(out, cap, "%s", b.slope ? "48 dB" : "12 dB");
-    }
-    else if (!trackeq::eqUsesGain(b.type))
-    {
-        snprintf(out, cap, "-");
-    }
-    else
-    {
-        const int g = b.gainDb10;
-        snprintf(out, cap, "%c%d.%d dB", g < 0 ? '-' : '+', (g < 0 ? -g : g) / 10, (g < 0 ? -g : g) % 10);
-    }
-}
-
 void cTrackEqEditor::showBandColumn(int i)
 {
     const trackeq::EqBand& b = params().band[i];
     snprintf(headerText[i], sizeof(headerText[i]), "Band %d", i + 1);
-    snprintf(valueText[i][0], sizeof(valueText[i][0]), "%s", trackeq::eqTypeName(b.type));
-    formatFreq(b.freqHz, valueText[i][1], sizeof(valueText[i][1]));
-    formatGain(b, i, valueText[i][2], sizeof(valueText[i][2]));
-    snprintf(valueText[i][3], sizeof(valueText[i][3]), "%d.%02d", b.q100 / 100, b.q100 % 100);
+    trackeq::eqFormatBand(i, b, valueText[i]);
 
     const Theme& th = display.getTheme();
     const uint32_t* base = b.on ? th.activeLabelsColors : th.inactiveLabelsColors;
@@ -271,8 +239,8 @@ void cTrackEqEditor::showBottomLabels()
 
         if (i < kBands)
         {
-            snprintf(bottomText[i], sizeof(bottomText[i]), "Band %d", i + 1);
-            t = bottomText[i];
+            static const char* const kBandNames[4] = { "Band 1", "Band 2", "Band 3", "Band 4" };
+            t = kBandNames[i];
             t2 = params().band[i].on ? "On" : "Off";
             if (i == band)
             {
@@ -293,9 +261,8 @@ void cTrackEqEditor::showBottomLabels()
                 colors = th.highlightedButtonLabelsColors;
             }
         }
-        snprintf(bottomText2[i], sizeof(bottomText2[i]), "%s", t2);
         display.setControlText(label[i], t);
-        display.setControlText2(label[i], bottomText2[i]);
+        display.setControlText2(label[i], t2);
         display.setControlColors(label[i], colors);
         display.setControlValue(label[i], i < kBands ? 1 : 0);
         display.refreshControl(label[i]);

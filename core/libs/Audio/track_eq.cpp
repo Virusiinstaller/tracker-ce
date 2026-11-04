@@ -2,6 +2,7 @@
 #include "track_eq.h"
 
 #include <cmath>
+#include <cstdio>
 
 #include "config.h"
 
@@ -24,6 +25,23 @@ void TrackEqSet::setDefault() {
 const char* eqTypeName(uint8_t type) {
     static const char* const kNames[kEqTypeCount] = {"Bell", "Low Shelf", "High Shelf", "Low Cut", "High Cut", "Notch"};
     return type < kEqTypeCount ? kNames[type] : "?";
+}
+
+void eqFormatBand(int bandIndex, const EqBand& b, char (&rows)[4][16]) {
+    std::snprintf(rows[0], sizeof(rows[0]), "%s", eqTypeName(b.type));
+    if (b.freqHz < 1000)
+        std::snprintf(rows[1], sizeof(rows[1]), "%u Hz", unsigned(b.freqHz));
+    else
+        std::snprintf(rows[1], sizeof(rows[1]), "%u.%02u kHz", unsigned(b.freqHz / 1000), unsigned((b.freqHz % 1000) / 10));
+    if (eqSlopeAllowed(bandIndex, b.type)) {
+        std::snprintf(rows[2], sizeof(rows[2]), "%s", b.slope ? "48 dB" : "12 dB");
+    } else if (!eqUsesGain(b.type)) {
+        std::snprintf(rows[2], sizeof(rows[2]), "-");
+    } else {
+        const int g = b.gainDb10, a = g < 0 ? -g : g;
+        std::snprintf(rows[2], sizeof(rows[2]), "%c%d.%d dB", g < 0 ? '-' : '+', a / 10, a % 10);
+    }
+    std::snprintf(rows[3], sizeof(rows[3]), "%u.%02u", unsigned(b.q100 / 100), unsigned(b.q100 % 100));
 }
 
 EqBand eqDefaultBand(int index) {
@@ -205,32 +223,27 @@ float eqResponseDb(const TrackEqParams& p, float hz) {
 void TrackEq::set(const TrackEqParams& p) {
     // First stage and stage capacity of each band: the cuts of bands 1 and 4 may use four.
     static const uint8_t kFirst[kEqBands] = {0, 4, 5, 6};
-    static const uint8_t kMax[kEqBands] = {4, 1, 1, 4};
     for (int i = 0; i < kEqBands; ++i) {
         EqBand nb = p.band[i];
         eqSanitize(nb);
         if (!eqSlopeAllowed(i, nb.type)) nb.slope = 0;
-        const bool want = nb.on && eqBandActive(nb);
-        const int ns = want ? eqStageCount(nb) : 0;
-        for (int j = 0; j < kMax[i]; ++j) {
+        const int ns = (nb.on && eqBandActive(nb)) ? eqStageCount(nb) : 0;
+        if (ns == stages_[i] && (ns == 0 || cfg_[i] == nb)) continue;   // nothing changed
+        const int old = stages_[i];
+        for (int j = 0; j < 4 && kFirst[i] + j < kStages; ++j) {
             Stage& s = st_[kFirst[i] + j];
+            const uint16_t bit = uint16_t(1u << (kFirst[i] + j));
             if (j >= ns) {
-                if (s.live) {
-                    s.live = false;
-                    s.z1 = s.z2 = 0.0f;
-                    --n_;
-                }
+                s.z1 = s.z2 = 0.0f;   // switched off: no stale tail when it comes back
+                live_ &= uint16_t(~bit);
                 continue;
             }
-            if (s.live && s.cfg == nb) continue;
-            if (!s.live) {
-                s.live = true;
-                s.z1 = s.z2 = 0.0f;
-                ++n_;
-            }
-            s.cfg = nb;
+            if (j >= old) s.z1 = s.z2 = 0.0f;   // newly live stage starts clean
+            live_ |= bit;
             eqStageCoefficients(nb, j, s.c);
         }
+        cfg_[i] = nb;
+        stages_[i] = uint8_t(ns);
     }
 }
 
@@ -239,8 +252,9 @@ void TrackEq::reset() {
 }
 
 AUDIO_CORE_RAM void TrackEq::process(float* x, uint32_t n) {
-    for (auto& s : st_) {
-        if (!s.live) continue;
+    for (int k = 0; k < kStages; ++k) {
+        if (!(live_ & (1u << k))) continue;
+        Stage& s = st_[k];
         const float b0 = s.c[0], b1 = s.c[1], b2 = s.c[2], a1 = s.c[3], a2 = s.c[4];
         float z1 = s.z1, z2 = s.z2;
         for (uint32_t i = 0; i < n; ++i) {

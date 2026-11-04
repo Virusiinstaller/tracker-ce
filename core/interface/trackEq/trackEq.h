@@ -47,8 +47,6 @@ class cTrackEqEditor : public ModuleBase
     static constexpr int kBands = trackeq::kEqBands;
 
     char titleText[24];
-    char bottomText[8][14];
-    char bottomText2[8][8];
     char valueText[kBands][4][16];
     char headerText[kBands][10];
 
