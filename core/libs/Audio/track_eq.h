@@ -73,6 +73,9 @@ struct TrackEqSet {
 
 inline bool eqUsesGain(uint8_t type) { return type == kEqPeak || type == kEqLowShelf || type == kEqHighShelf; }
 const char* eqTypeName(uint8_t type);
+// Text of a band for the editors: rows[0..3] = type, frequency, gain (or slope on the cut
+// bands, "-" where the type has none) and Q.
+void eqFormatBand(int bandIndex, const EqBand& b, char (&rows)[4][16]);
 // The 48 dB/oct option exists for the cut types of bands 1 and 4 (index 0 and 3).
 inline bool eqSlopeAllowed(int bandIndex, uint8_t type) {
     return (bandIndex == 0 || bandIndex == 3) && (type == kEqLowCut || type == kEqHighCut);
@@ -122,7 +125,7 @@ public:
     // Clear every filter state (voice went silent).
     void reset();
     // True when at least one band processes audio.
-    bool active() const { return n_ != 0; }
+    bool active() const { return live_ != 0; }
     // In place, `n` samples (normalised floats).
     void process(float* x, uint32_t n);
 
@@ -130,13 +133,13 @@ private:
     struct Stage {
         float c[5] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         float z1 = 0.0f, z2 = 0.0f;
-        EqBand cfg;
-        bool live = false;
     };
     // Band 1 and band 4 can use four stages (48 dB/oct cut), bands 2 and 3 one.
     static constexpr int kStages = 10;
     Stage st_[kStages];
-    uint8_t n_ = 0;   // stages with live == true
+    EqBand cfg_[kEqBands];       // band as last applied (valid while stages_[i] != 0)
+    uint8_t stages_[kEqBands] = {0, 0, 0, 0};   // live stages of each band
+    uint16_t live_ = 0;          // bit per live stage
 };
 
 }  // namespace trackeq
