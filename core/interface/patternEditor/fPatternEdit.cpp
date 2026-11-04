@@ -1,3 +1,4 @@
+#include "track_eq.h"
 #include "mtStructs.h"
 #include "patternEditor/patternEditor.h"
 #include <assert.h>
@@ -48,6 +49,7 @@ static void functPastePattern();
 
 static void functNamePattern();
 static void functNameTrack();
+static void functTrackEq();
 
 static void functClockWarningPopupButtons(uint8_t button, uint8_t state);
 
@@ -3909,6 +3911,17 @@ static void functNamePattern()
     PTE->setKeyboardNamePatternFunctions(functConfirmNamePattern, true);
 }
 
+// Pattern > More (page 3) > Track EQ: opens the EQ of the track under the cursor (tracks 1-8).
+static void functTrackEq()
+{
+    if (PTE->trackerPattern.actualTrack >= trackeq::kEqTracks)
+    {
+        return;
+    }
+    uint8_t track = (uint8_t)PTE->trackerPattern.actualTrack;
+    PTE->eventFunct(eventActivateTrackEq, PTE, &track, 0);
+}
+
 static void functNameTrack()
 {
     if (PTE->trackerPattern.actualTrack >= kAllTracks)
@@ -5157,6 +5170,7 @@ void cPatternEditor::setActionButtonPage3Funct()
 
     ip->setButtonObj(interfaceButton0, buttonPress, functNamePattern);
     ip->setButtonObj(interfaceButton1, buttonPress, functNameTrack);
+    ip->setButtonObj(interfaceButton2, buttonPress, functTrackEq);
 
     ip->setButtonObj(interfaceButton7, buttonPress, functNextActionButtonPage);
 }

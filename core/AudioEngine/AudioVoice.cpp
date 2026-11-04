@@ -5,7 +5,9 @@ AudioVoice::AudioVoice()
 {
     connections.push_back(new AudioConnection(&memoryPlayer, &bitDepth));
     connections.push_back(new AudioConnection(&bitDepth, &filter));
-    connections.push_back(new AudioConnection(&filter, &amplifier));
+    // Track EQ sits after the filter: the sends (tapped at the EQ) carry the EQ'd sound.
+    connections.push_back(new AudioConnection(&filter, &trackEq));
+    connections.push_back(new AudioConnection(&trackEq, &amplifier));
     connections.push_back(new AudioConnection(&amplifier, &monoToStereo));
     connections.push_back(new AudioConnection(&amplifier, &rms));
 }
@@ -16,7 +18,8 @@ AudioVoice::AudioVoice()
     {
         connections.push_back(new AudioConnection(&memoryPlayer[channel], &bitDepth[channel]));
         connections.push_back(new AudioConnection(&bitDepth[channel], &filter[channel]));
-        connections.push_back(new AudioConnection(&filter[channel], &amplifier[channel]));
+        connections.push_back(new AudioConnection(&filter[channel], &trackEq[channel]));
+        connections.push_back(new AudioConnection(&trackEq[channel], &amplifier[channel]));
         connections.push_back(new AudioConnection(&amplifier[channel], &panningAmplifier[channel]));
         connections.push_back(new AudioConnection(&amplifier[channel], &rms[channel]));
     }
@@ -56,6 +59,18 @@ AudioFilterStateVariable* AudioVoice::getFilter()
 AudioFilterStateVariable* AudioVoice::getFilter(VoiceChannels channel)
 {
     return &filter[channel];
+}
+#endif
+
+#ifndef PLATFORM_IMX
+AudioEffectTrackEq* AudioVoice::getTrackEq()
+{
+    return &trackEq;
+}
+#else
+AudioEffectTrackEq* AudioVoice::getTrackEq(VoiceChannels channel)
+{
+    return &trackEq[channel];
 }
 #endif
 

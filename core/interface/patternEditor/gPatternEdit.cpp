@@ -1571,7 +1571,7 @@ void cPatternEditor::showActionButtonPage3Labels()
 {
     display.setControlText(label[0], "Pattern");
     display.setControlText(label[1], "Track");
-    display.setControlText(label[2], "");
+    display.setControlText(label[2], "Track");
     display.setControlText(label[3], "");
     display.setControlText(label[4], "");
     display.setControlText(label[5], "");
@@ -1580,7 +1580,7 @@ void cPatternEditor::showActionButtonPage3Labels()
 
     display.setControlText2(label[0], "Name");
     display.setControlText2(label[1], "Name");
-    display.setControlText2(label[2], "");
+    display.setControlText2(label[2], "EQ");
     display.setControlText2(label[3], "");
     display.setControlText2(label[4], "");
     display.setControlText2(label[5], "");
@@ -1596,10 +1596,16 @@ void cPatternEditor::showActionButtonPage3Labels()
 
     display.setControlColors(label[0], display.getTheme().activeButtonLabelsColors);
     display.setControlColors(label[1], display.getTheme().activeButtonLabelsColors);
+    // Track EQ exists for the sample tracks only
+    display.setControlColors(label[2],
+                             trackerPattern.actualTrack < trackeq::kEqTracks
+                               ? display.getTheme().activeButtonLabelsColors
+                               : display.getTheme().inactiveButtonLabelsColors);
     display.setControlColors(label[7], display.getTheme().moreButtonColors);
 
     display.setControlData(label[0], &labelDataGreen);
     display.setControlData(label[1], &labelDataGreen);
+    display.setControlData(label[2], &labelDataGreen);
     display.setControlData(label[7], &labelDataMore);
 
     for (uint8_t i = 0; i < 8; i++)
@@ -1609,7 +1615,7 @@ void cPatternEditor::showActionButtonPage3Labels()
           label[i],
           controlStyleCenterX | controlStyleCenterY | controlStyleFont3 | controlStyleShow |
             (i == 7 ? controlStyleSpecialFx2
-                    : (i < 2 ? (display.getTheme().patternEditorBottomButtonsLines
+                    : (i < 3 ? (display.getTheme().patternEditorBottomButtonsLines
                                   ? controlStyleSpecialFx
                                   : 0)
                              : 0)));
