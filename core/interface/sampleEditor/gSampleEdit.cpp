@@ -206,40 +206,11 @@ void cSampleEditor::hideEqControls()
     }
 }
 
-static void eqFormatFreq(int hz, char* out, int cap)
-{
-    if (hz < 1000)
-        snprintf(out, cap, "%d Hz", hz);
-    else
-        snprintf(out, cap, "%d.%02d kHz", hz / 1000, (hz % 1000) / 10);
-}
-
-static void eqFormatGain(const trackeq::EqBand& b, int index, char* out, int cap)
-{
-    if (trackeq::eqSlopeAllowed(index, b.type))
-    {
-        snprintf(out, cap, "%s", b.slope ? "48 dB" : "12 dB");
-    }
-    else if (!trackeq::eqUsesGain(b.type))
-    {
-        snprintf(out, cap, "-");
-    }
-    else
-    {
-        const int g = b.gainDb10;
-        const int a = g < 0 ? -g : g;
-        snprintf(out, cap, "%c%d.%d dB", g < 0 ? '-' : '+', a / 10, a % 10);
-    }
-}
-
 void cSampleEditor::eqShowBand(int i)
 {
     const trackeq::EqBand& b = sampleEditorEQ4.getBands().band[i];
     snprintf(eqHeadText[i], sizeof(eqHeadText[i]), "Band %d", i + 1);
-    snprintf(eqValueText[i][0], sizeof(eqValueText[i][0]), "%s", trackeq::eqTypeName(b.type));
-    eqFormatFreq(b.freqHz, eqValueText[i][1], sizeof(eqValueText[i][1]));
-    eqFormatGain(b, i, eqValueText[i][2], sizeof(eqValueText[i][2]));
-    snprintf(eqValueText[i][3], sizeof(eqValueText[i][3]), "%d.%02d", b.q100 / 100, b.q100 % 100);
+    trackeq::eqFormatBand(i, b, eqValueText[i]);
 
     const Theme& th = display.getTheme();
     const uint32_t* base = b.on ? th.activeLabelsColors : th.inactiveLabelsColors;
@@ -274,8 +245,8 @@ void cSampleEditor::refreshEqScreen()
         const uint32_t* colors = th.activeLabelsColors;
         if (i < trackeq::kEqBands)
         {
-            snprintf(eqBottomText[i], sizeof(eqBottomText[i]), "Band %d", i + 1);
-            t = eqBottomText[i];
+            static const char* const kBandNames[4] = { "Band 1", "Band 2", "Band 3", "Band 4" };
+            t = kBandNames[i];
             t2 = p.band[i].on ? "On" : "Off";
             if (i == eqBand)
                 colors = th.highlightedButtonLabelsColors;
@@ -296,9 +267,8 @@ void cSampleEditor::refreshEqScreen()
         {
             t = "Apply";
         }
-        snprintf(eqBottomText2[i], sizeof(eqBottomText2[i]), "%s", t2);
         display.setControlText(label[i], t);
-        display.setControlText2(label[i], eqBottomText2[i]);
+        display.setControlText2(label[i], t2);
         display.setControlColors(label[i], colors);
         display.setControlValue(label[i], i < trackeq::kEqBands ? 1 : 0);
         display.refreshControl(label[i]);

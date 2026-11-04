@@ -409,8 +409,6 @@ class cSampleEditor : public ModuleBase
     uint32_t eqGraphColors[4];
     char eqHeadText[trackeq::kEqBands][10];
     char eqValueText[trackeq::kEqBands][4][16];
-    char eqBottomText[8][8];
-    char eqBottomText2[8][8];
     strList effectListData;
     strList paramListData[kEffectPageParams];
     strLabelData labelDataMore;
