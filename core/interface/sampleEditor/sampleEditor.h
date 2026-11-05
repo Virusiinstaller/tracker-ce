@@ -274,7 +274,8 @@ class cSampleEditor : public ModuleBase
     void eqChangeValue(int steps, bool coarse);
     void eqResetBand();
     void eqCommit(const trackeq::TrackEqParams& p);
-    void eqShowBand(int i);
+    void eqNextPage();
+    void eqBack();
     //*******************
     //******************* GRAPHIC OPERATIONS
     void showTitleBar(const char* title);
@@ -398,17 +399,12 @@ class cSampleEditor : public ModuleBase
     hControl popupProgressBar;
     hControl bgLabel;
     // EQ4 screen
-    hControl eqGraph = -1;
-    hControl eqHead[trackeq::kEqBands];
-    hControl eqValue[trackeq::kEqBands][4];
+    cEqPanel eqPanel;
     int eqBand = 0;
     int eqParam = 1; // 0 type, 1 frequency, 2 gain / slope, 3 Q
+    int eqPage = 0;  // 0 = bands (F1..F4), 1 = parameters of the selected band (F1..F4)
 
     // DISPLAY CONTROLS DATA
-    strEqGraphData eqGraphData;
-    uint32_t eqGraphColors[4];
-    char eqHeadText[trackeq::kEqBands][10];
-    char eqValueText[trackeq::kEqBands][4][16];
     strList effectListData;
     strList paramListData[kEffectPageParams];
     strLabelData labelDataMore;

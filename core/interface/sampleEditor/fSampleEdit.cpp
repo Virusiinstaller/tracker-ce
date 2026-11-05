@@ -69,7 +69,8 @@ static void functSelectParameter(uint8_t button);
 static void functParamsScreenMore();
 static void functBack();
 static void functEqEncoder(int16_t value);
-static void functEqBandButton(uint8_t button);
+static void functEqButton(uint8_t button);
+static void functEqBack();
 static void functEqUp();
 static void functEqDown();
 static void functEqLeft();
@@ -622,6 +623,7 @@ void cSampleEditor::switchScreen(enScreenType s)
         prepareDisplayDataParamsScreen();
         if (isEq4())
         {
+            eqPage = 0;
             showEqScreen();
         }
         else
@@ -2331,18 +2333,17 @@ char** cSampleEditor::getParameterListItems(uint8_t paramIdx) const
 //**************************** EQ4 screen
 void cSampleEditor::setEqScreenFunctions()
 {
-    for (uint8_t i = interfaceButton0; i <= interfaceButton3; i++)
+    for (uint8_t i = interfaceButton0; i <= interfaceButton4; i++)
     {
-        ip->setButtonObj(i, buttonPress, functEqBandButton);
+        ip->setButtonObj(i, buttonPress, functEqButton);
     }
-    ip->setButtonObj(interfaceButton4, buttonPress, functEqReset);
     ip->setButtonObj(interfaceButtonLeft, buttonPress, functEqLeft);
     ip->setButtonObj(interfaceButtonRight, buttonPress, functEqRight);
     ip->setButtonObj(interfaceButtonUp, buttonPress, functEqUp);
     ip->setButtonObj(interfaceButtonDown, buttonPress, functEqDown);
     ip->setButtonObj(interfaceButtonDelete, buttonPress, functEqReset);
 
-    ip->setButtonObj(interfaceButton5, buttonPress, functBack);
+    ip->setButtonObj(interfaceButton5, buttonPress, functEqBack);
     switch (previewState)
     {
         case previewStatePreview:
@@ -2387,6 +2388,34 @@ void cSampleEditor::eqSelectParam(int param)
 {
     eqParam = clamp(param, 0, 3);
     refreshEqScreen();
+}
+
+// F5: bands -> parameters of the selected band; on the parameter page: next band
+void cSampleEditor::eqNextPage()
+{
+    if (eqPage == 0)
+    {
+        eqPage = 1;
+    }
+    else
+    {
+        eqBand = (eqBand + 1) % trackeq::kEqBands;
+    }
+    refreshEqScreen();
+}
+
+// F6: parameters -> bands -> back to the Sample Editor
+void cSampleEditor::eqBack()
+{
+    if (eqPage == 1)
+    {
+        eqPage = 0;
+        refreshEqScreen();
+    }
+    else
+    {
+        functBack();
+    }
 }
 
 void cSampleEditor::eqChangeValue(int steps, bool coarse)
@@ -2437,39 +2466,58 @@ void cSampleEditor::eqResetBand()
     refreshEqScreen();
 }
 
-static bool eqShiftHeld()
-{
-    return ModuleBase::buttons->isButtonPressed(interfaceButtonShift);
-}
-
 static void functEqEncoder(int16_t value)
 {
-    SE->eqChangeValue(value, eqShiftHeld());
+    SE->eqChangeValue(value, ModuleBase::buttons->isButtonPressed(interfaceButtonShift));
 }
 
-static void functEqBandButton(uint8_t button)
+// F1..F4: select a band (page 0) or a parameter (page 1); F5: next page / next band
+static void functEqButton(uint8_t button)
 {
-    SE->eqSelectBand(button);
+    if (button == 4)
+    {
+        SE->eqNextPage();
+    }
+    else if (SE->eqPage == 0)
+    {
+        SE->eqSelectBand(button);
+    }
+    else
+    {
+        SE->eqSelectParam(button);
+    }
+}
+
+static void functEqBack()
+{
+    SE->eqBack();
 }
 
 static void functEqUp()
 {
-    SE->eqSelectParam(SE->eqParam - 1);
+    SE->eqChangeValue(1, ModuleBase::buttons->isButtonPressed(interfaceButtonShift));
 }
 
 static void functEqDown()
 {
-    SE->eqSelectParam(SE->eqParam + 1);
+    SE->eqChangeValue(-1, ModuleBase::buttons->isButtonPressed(interfaceButtonShift));
 }
 
+// Left / Right: previous / next band on the band page, previous / next parameter on the other
 static void functEqLeft()
 {
-    SE->eqSelectBand(SE->eqBand - 1);
+    if (SE->eqPage == 0)
+        SE->eqSelectBand(SE->eqBand - 1);
+    else
+        SE->eqSelectParam(SE->eqParam - 1);
 }
 
 static void functEqRight()
 {
-    SE->eqSelectBand(SE->eqBand + 1);
+    if (SE->eqPage == 0)
+        SE->eqSelectBand(SE->eqBand + 1);
+    else
+        SE->eqSelectParam(SE->eqParam + 1);
 }
 
 static void functEqReset()

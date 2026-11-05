@@ -145,115 +145,46 @@ void cSampleEditor::initDisplayControls()
     backgroundLabelProperties.h = 54;
     bgLabel = display.createControl<cBgLabel>(&backgroundLabelProperties);
 
-    // EQ4 screen: graph, four band columns (header + type / frequency / gain / Q)
-    eqGraphColors[0] = display.getTheme().waveformColors[0];
-    eqGraphColors[1] = display.getTheme().waveformColors[1];
-    eqGraphColors[2] = display.getTheme().waveformPointsColors[1];
-    eqGraphColors[3] = display.getTheme().waveformPointsColors[0];
-
-    strControlProperties eqProp;
-    eqProp.colors = eqGraphColors;
-    eqProp.data = &eqGraphData;
-    eqProp.style = 0;
-    eqProp.x = 2;
-    eqProp.y = 34;
-    eqProp.w = 796;
-    eqProp.h = 218;
-    eqGraph = display.createControl<cEqGraph>(&eqProp);
-
-    for (int b = 0; b < trackeq::kEqBands; ++b)
-    {
-        strControlProperties head;
-        head.colors = display.getTheme().activeLabelsColors;
-        head.text = eqHeadText[b];
-        head.style = (controlStyleCenterX | controlStyleCenterY | controlStyleFont3);
-        head.x = 200 * b + 100;
-        head.y = 262;
-        head.w = 194;
-        head.h = 30;
-        head.value = 0;
-        eqHead[b] = display.createControl<cLabel>(&head);
-
-        for (int r = 0; r < 4; ++r)
-        {
-            strControlProperties row;
-            row.colors = display.getTheme().activeLabelsColors;
-            row.text = eqValueText[b][r];
-            row.style = (controlStyleCenterX | controlStyleCenterY | controlStyleFont2);
-            row.x = 200 * b + 100;
-            row.y = 262 + 30 * (r + 1);
-            row.w = 194;
-            row.h = 30;
-            row.value = 0;
-            eqValue[b][r] = display.createControl<cLabel>(&row);
-        }
-    }
+    // EQ4 screen: graph, band columns and parameter columns (shared with the Track EQ)
+    eqPanel.create();
 }
 
 void cSampleEditor::hideEqControls()
 {
-    display.setControlHide(eqGraph);
-    display.refreshControl(eqGraph);
-    for (int b = 0; b < trackeq::kEqBands; ++b)
-    {
-        display.setControlHide(eqHead[b]);
-        display.refreshControl(eqHead[b]);
-        for (int r = 0; r < 4; ++r)
-        {
-            display.setControlHide(eqValue[b][r]);
-            display.refreshControl(eqValue[b][r]);
-        }
-    }
+    eqPanel.hide();
 }
 
-void cSampleEditor::eqShowBand(int i)
-{
-    const trackeq::EqBand& b = sampleEditorEQ4.getBands().band[i];
-    snprintf(eqHeadText[i], sizeof(eqHeadText[i]), "Band %d", i + 1);
-    trackeq::eqFormatBand(i, b, eqValueText[i]);
-
-    const Theme& th = display.getTheme();
-    const uint32_t* base = b.on ? th.activeLabelsColors : th.inactiveLabelsColors;
-    display.setControlColors(eqHead[i], i == eqBand ? th.highlightedButtonLabelsColors : base);
-    display.refreshControl(eqHead[i]);
-    for (int r = 0; r < 4; ++r)
-    {
-        const bool selected = (i == eqBand && r == eqParam);
-        display.setControlColors(eqValue[i][r], selected ? th.highlightedButtonLabelsColors : base);
-        display.refreshControl(eqValue[i][r]);
-    }
-}
-
+// Page 0: F1..F4 the bands (again = on / off), F5 opens the band's parameters.
+// Page 1: F1..F4 the parameters of the selected band (Type / Freq / Gain or Slope / Q), F5 next band.
+// F6 Back, F7 Preview / Stop, F8 Apply as on the other effects.
 void cSampleEditor::refreshEqScreen()
 {
     const trackeq::TrackEqParams& p = sampleEditorEQ4.getBands();
     const Theme& th = display.getTheme();
 
-    eqGraphData.params = &p;
-    eqGraphData.selectedBand = (int8_t)eqBand;
-    display.refreshControl(eqGraph);
-    for (int i = 0; i < trackeq::kEqBands; ++i)
-    {
-        eqShowBand(i);
-    }
+    eqPanel.refresh(p, eqBand, eqPage ? eqParam : -1);
 
-    // F1..F4 bands, F5 reset band, F6 Back, F7 Preview / Stop, F8 Apply (as on the other effects)
     for (int i = 0; i < 8; ++i)
     {
         const char* t = "";
         const char* t2 = "";
-        const uint32_t* colors = th.activeLabelsColors;
         if (i < trackeq::kEqBands)
         {
-            static const char* const kBandNames[4] = { "Band 1", "Band 2", "Band 3", "Band 4" };
-            t = kBandNames[i];
-            t2 = p.band[i].on ? "On" : "Off";
-            if (i == eqBand)
-                colors = th.highlightedButtonLabelsColors;
+            if (eqPage == 0)
+            {
+                t = eqPanel.bandName(i);
+                t2 = p.band[i].on ? "On" : "Off";
+            }
+            else
+            {
+                t = eqPanel.paramName(i);
+                t2 = eqPanel.paramValue(i);
+            }
         }
         else if (i == 4)
         {
-            t = "Reset";
+            t = eqPage == 0 ? "Params" : eqPanel.bandName(eqBand);
+            t2 = eqPage == 0 ? "" : "Next";
         }
         else if (i == 5)
         {
@@ -263,13 +194,13 @@ void cSampleEditor::refreshEqScreen()
         {
             t = (previewState == previewStateStop) ? "Stop" : "Preview";
         }
-        else
+        else if (i == 7)
         {
             t = "Apply";
         }
         display.setControlText(label[i], t);
         display.setControlText2(label[i], t2);
-        display.setControlColors(label[i], colors);
+        display.setControlColors(label[i], th.activeLabelsColors);
         display.setControlValue(label[i], i < trackeq::kEqBands ? 1 : 0);
         display.refreshControl(label[i]);
     }
@@ -309,18 +240,7 @@ void cSampleEditor::showEqScreen()
 
     showTitleBar(paramsScreenLabel);
 
-    display.setControlShow(eqGraph);
-    display.setControlData(eqGraph, &eqGraphData);
-    for (int b = 0; b < trackeq::kEqBands; ++b)
-    {
-        display.setControlShow(eqHead[b]);
-        display.setControlText(eqHead[b], eqHeadText[b]);
-        for (int r = 0; r < 4; ++r)
-        {
-            display.setControlShow(eqValue[b][r]);
-            display.setControlText(eqValue[b][r], eqValueText[b][r]);
-        }
-    }
+    eqPanel.show();
     display.setControlValue(bgLabel, 255);
     display.setControlShow(bgLabel);
     refreshEqScreen();
