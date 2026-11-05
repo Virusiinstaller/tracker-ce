@@ -40,24 +40,16 @@ class cTrackEqEditor : public ModuleBase
 
   private:
     void showBottomLabels();
-    void showBandColumn(int bandIdx);
     const trackeq::TrackEqParams& params() const;
     void commit(const trackeq::TrackEqParams& p);
 
     static constexpr int kBands = trackeq::kEqBands;
 
     char titleText[24];
-    char valueText[kBands][4][16];
-    char headerText[kBands][10];
 
     hControl label[8];
     hControl bgLabel;
-    hControl graph;
-    hControl bandHeader[kBands];
-    hControl bandValue[kBands][4];
-
-    strEqGraphData graphData;
-    uint32_t graphColors[4];
+    cEqPanel panel;
 };
 
 extern cTrackEqEditor trackEqEditor;

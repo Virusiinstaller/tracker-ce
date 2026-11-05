@@ -208,76 +208,25 @@ void cTrackEqEditor::resetBand()
 }
 
 //----------------------------------------------------------------------------------------------
-void cTrackEqEditor::showBandColumn(int i)
-{
-    const trackeq::EqBand& b = params().band[i];
-    snprintf(headerText[i], sizeof(headerText[i]), "Band %d", i + 1);
-    trackeq::eqFormatBand(i, b, valueText[i]);
-
-    const Theme& th = display.getTheme();
-    const uint32_t* base = b.on ? th.activeLabelsColors : th.inactiveLabelsColors;
-    display.setControlColors(bandHeader[i], i == band ? th.highlightedButtonLabelsColors : base);
-    display.refreshControl(bandHeader[i]);
-    for (int r = 0; r < 4; ++r)
-    {
-        const bool selected = (i == band && r == param);
-        display.setControlColors(bandValue[i][r], selected ? th.highlightedButtonLabelsColors : base);
-        display.refreshControl(bandValue[i][r]);
-    }
-}
-
 void cTrackEqEditor::showBottomLabels()
 {
-    const trackeq::EqBand& sel = params().band[band];
-    const Theme& th = display.getTheme();
-
+    // F1..F4: band + On / Off, F5..F8: the selected band's parameter and its value
     for (int i = 0; i < 8; ++i)
     {
-        const char* t = "";
-        const char* t2 = "";
-        const uint32_t* colors = th.activeLabelsColors;
-
-        if (i < kBands)
-        {
-            static const char* const kBandNames[4] = { "Band 1", "Band 2", "Band 3", "Band 4" };
-            t = kBandNames[i];
-            t2 = params().band[i].on ? "On" : "Off";
-            if (i == band)
-            {
-                colors = th.highlightedButtonLabelsColors;
-            }
-        }
-        else
-        {
-            static const char* const kNames[4] = { "Type", "Freq", "Gain", "Q" };
-            const int p = i - kBands;
-            t = kNames[p];
-            if (p == 2 && trackeq::eqSlopeAllowed(band, sel.type))
-            {
-                t = "Slope";
-            }
-            if (p == param)
-            {
-                colors = th.highlightedButtonLabelsColors;
-            }
-        }
-        display.setControlText(label[i], t);
-        display.setControlText2(label[i], t2);
-        display.setControlColors(label[i], colors);
-        display.setControlValue(label[i], i < kBands ? 1 : 0);
+        const bool isBand = i < kBands;
+        display.setControlText(label[i], isBand ? panel.bandName(i) : panel.paramName(i - kBands));
+        display.setControlText2(label[i],
+                                isBand ? (params().band[i].on ? "On" : "Off")
+                                       : panel.paramValue(i - kBands));
+        display.setControlColors(label[i], display.getTheme().activeLabelsColors);
+        display.setControlValue(label[i], 1);
         display.refreshControl(label[i]);
     }
 }
 
 void cTrackEqEditor::refreshValues()
 {
-    graphData.params = &params();
-    graphData.selectedBand = (int8_t)band;
-    display.refreshControl(graph);
-    for (int i = 0; i < kBands; ++i)
-    {
-        showBandColumn(i);
-    }
+    panel.refresh(params(), band, param);
     showBottomLabels();
     display.refreshControl(bgLabel);
     display.synchronizeRefresh();
@@ -289,18 +238,7 @@ void cTrackEqEditor::showScreen()
     titleBar->show();
     titleBar->setTitle(titleText);
 
-    for (int i = 0; i < kBands; ++i)
-    {
-        display.setControlShow(bandHeader[i]);
-        for (int r = 0; r < 4; ++r)
-        {
-            display.setControlShow(bandValue[i][r]);
-            display.setControlText(bandValue[i][r], valueText[i][r]);
-        }
-        display.setControlText(bandHeader[i], headerText[i]);
-    }
-    display.setControlShow(graph);
-    display.setControlData(graph, &graphData);
+    panel.show();
     refreshValues();
 }
 
