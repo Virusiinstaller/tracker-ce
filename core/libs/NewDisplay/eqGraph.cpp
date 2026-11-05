@@ -175,10 +175,13 @@ void cEqGraph::update()
         frame(kEqColumnW * graph->selectedBand + 1, kEqColumnsY, kEqColumnW - 3, kEqColumnH);
         if (graph->selectedParam >= 0)
         {
-            frame(kEqColumnW * (trackeq::kEqBands + graph->selectedParam) + 1,
-                  kEqColumnsY,
-                  kEqColumnW - 3,
-                  kEqColumnH);
+            if (graph->paramColumns)
+            {
+                frame(kEqColumnW * (trackeq::kEqBands + graph->selectedParam) + 1,
+                      kEqColumnsY,
+                      kEqColumnW - 3,
+                      kEqColumnH);
+            }
             frame(kEqColumnW * graph->selectedBand + 5,
                   kEqColumnsY + kEqRowH * (graph->selectedParam + 1) + 1,
                   kEqColumnW - 11,
@@ -194,8 +197,10 @@ const char* cEqPanel::bandName(int i)
     return kNames[i];
 }
 
-void cEqPanel::create()
+void cEqPanel::create(bool parameterColumns)
 {
+    paramColumns = parameterColumns;
+    data.paramColumns = parameterColumns;
     eqGraphColors(colors);
     const Theme& th = display.getTheme();
 
@@ -237,7 +242,7 @@ void cEqPanel::create()
         }
     }
 
-    for (int k = 0; k < 4; ++k)
+    for (int k = 0; paramColumns && k < 4; ++k)
     {
         strControlProperties n;
         n.colors = th.activeLabelsColors;
@@ -275,7 +280,7 @@ void cEqPanel::show()
             display.setControlShow(row[b][r]);
         }
     }
-    for (int k = 0; k < 4; ++k)
+    for (int k = 0; paramColumns && k < 4; ++k)
     {
         display.setControlShow(nameLabel[k]);
         display.setControlShow(valueLabel[k]);
@@ -296,7 +301,7 @@ void cEqPanel::hide()
             display.refreshControl(row[b][r]);
         }
     }
-    for (int k = 0; k < 4; ++k)
+    for (int k = 0; paramColumns && k < 4; ++k)
     {
         display.setControlHide(nameLabel[k]);
         display.refreshControl(nameLabel[k]);
@@ -339,6 +344,10 @@ void cEqPanel::refresh(const trackeq::TrackEqParams& p, int band, int param)
         const bool unused = (k == 2 && !slope && !trackeq::eqUsesGain(sel.type));
         snprintf(names[k], sizeof(names[k]), "%s", slope ? "Slope" : kNames[k]);
         snprintf(values[k], sizeof(values[k]), "%s", rowText[band][k]);
+        if (!paramColumns)
+        {
+            continue;
+        }
         const uint32_t* c = (sel.on && !unused) ? th.activeLabelsColors : th.inactiveLabelsColors;
         display.setControlColors(nameLabel[k], c);
         display.setControlColors(valueLabel[k], c);

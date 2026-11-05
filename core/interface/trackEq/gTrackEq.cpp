@@ -8,7 +8,7 @@
 
 void cTrackEqEditor::initDisplayControls()
 {
-    panel.create(); // graph, band columns, parameter columns
+    panel.create(true); // graph, band columns, parameter columns
 
     strControlProperties prop;
 
