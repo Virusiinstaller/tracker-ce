@@ -29,6 +29,7 @@ mtEffect* sampleEditorEffect[editorEffectMax] = { &sampleEditorNormalizer,
                                                   &sampleEditorChorus,
                                                   &sampleEditorFlanger,
                                                   &sampleEditorEQ,
+                                                  &sampleEditorEQ4,
                                                   &sampleEditorLimiter,
                                                   &sampleEditorCompresor,
                                                   &sampleEditorWavetableSmoother,
@@ -36,7 +37,6 @@ mtEffect* sampleEditorEffect[editorEffectMax] = { &sampleEditorNormalizer,
                                                   &sampleEditorTimestretchNote,
                                                   &sampleEditorFadeIn,
                                                   &sampleEditorFadeOut,
-                                                  &sampleEditorEQ4,
                                                   &sampleEditorModular };
 
 //******************************DELAY

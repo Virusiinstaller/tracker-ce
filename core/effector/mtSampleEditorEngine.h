@@ -14,6 +14,7 @@ enum enSampleEditorEffect
     editorEffectChorus,
     editorEffectFlanger,
     editorEffectEQ,
+    editorEffectEQ4,
     editorEffectLimiter,
     editorEffectCompresor,
     editorEffectWavetableSmoother,
@@ -21,7 +22,6 @@ enum enSampleEditorEffect
     editorEffectTimestretchNote,
     editorEffectFadeIn,
     editorEffectFadeOut,
-    editorEffectEQ4,
     editorEffectModular,
 
     //**********************//

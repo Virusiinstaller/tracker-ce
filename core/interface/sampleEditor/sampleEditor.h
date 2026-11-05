@@ -15,10 +15,10 @@ char* const effectNamesLabels[editorEffectMax] = {
     (char*)"Overdrive",        (char*)"Delay",
     (char*)"Bitcrusher",       (char*)"Chorus",
     (char*)"Flanger",          (char*)"Equalizer",
-    (char*)"Limiter",          (char*)"Compressor",
-    (char*)"WT Smoother",      (char*)"Timestretch Beat",
-    (char*)"Timestretch Note", (char*)"Fade In",
-    (char*)"Fade Out",         (char*)"EQ4",
+    (char*)"4-Band Dynamic EQ", (char*)"Limiter",
+    (char*)"Compressor",       (char*)"WT Smoother",
+    (char*)"Timestretch Beat", (char*)"Timestretch Note",
+    (char*)"Fade In",          (char*)"Fade Out",
     (char*)"Modular"
 };
 
@@ -111,6 +111,7 @@ const strEffectDisplayConstantParams effectDisplayConstantParams[editorEffectMax
       eqParams::displayMult,
       eqParams::afterValueText,
       eqParams::displayType },
+    {}, // 4-band EQ - dedicated screen (graph + band editor), no parameter bars
     { 3,
       limiterParams::labelText,
       limiterParams::upConstrain,
@@ -153,7 +154,6 @@ const strEffectDisplayConstantParams effectDisplayConstantParams[editorEffectMax
       timestretchNoteParams::displayType },
     {}, // fade in  -  brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
-    {}, // eq4 - dedicated screen (graph + band editor), no parameter bars
     {}  // modular - dynamiczne parametry
 };
 
@@ -168,6 +168,7 @@ const strEffectDefaultParams effectDefaultParamsTable[editorEffectMax] = {
     { { 128.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },      // chorus
     { { 128.0f, 50.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },     // flanger
     { { 0.0f, 80.0f, 1.0f, 0.0f, 800.0f, 1.0f, 0.0f, 12000.0f, 1.0f } }, // eq
+    {}, // 4-band EQ - the band set lives in sampleEditorEQ4
     { { -6.0f, 3.0f, 300.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },     // limiter
     { { -12.0f, 4.0f, 10.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },    // compressor
     { { 256.0f, 2048.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },   // wt smoother
@@ -175,7 +176,6 @@ const strEffectDefaultParams effectDefaultParamsTable[editorEffectMax] = {
     { { 0.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } },      // timestretch note
     {}, // fade in - brak drugiego ekranu
     {}, // fade out - brak drugiego ekranu
-    {}, // eq4 - the band set lives in sampleEditorEQ4
     {}  // modular
 };
 
