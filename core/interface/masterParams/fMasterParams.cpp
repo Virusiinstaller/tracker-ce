@@ -121,6 +121,7 @@ static void functMenu(uint8_t state);
 
 // zmiana nazwy trackow
 static void functEditModeToggle();
+static void functOpenTrackEq();
 
 static void functCancelEditTrackName();
 static void functSaveTrackName();
@@ -1212,6 +1213,8 @@ void cMasterParams::switchToMixer()
 
     ip->setButtonObj(interfaceButtonPlay, buttonPress, functPlayAction);
     ip->setButtonObj(interfaceButtonRec, buttonPress, functEditModeToggle);
+    // hold a track button + Insert: that track's EQ
+    ip->setButtonObj(interfaceButtonInsert, buttonPress, functOpenTrackEq);
 
     editTrackNameMode = 0;
     displayType = displayMode::mixer;
@@ -1764,6 +1767,24 @@ static void functSoloMute(uint8_t state)
     {
         MP->isSolo = state;
         MP->showMixerScreen();
+    }
+}
+
+static void functOpenTrackEq()
+{
+    if (MP->displayType != cMasterParams::displayMode::mixer || MP->editTrackNameMode)
+    {
+        return;
+    }
+    for (uint8_t n = 0; n < trackeq::kEqTracks; n++)
+    {
+        if (MP->buttons->isButtonPressed(interfaceButton0 + n))
+        {
+            MP->ignoreMuteRelease[n] = true; // do not toggle the mute when the key is released
+            uint8_t track = n;
+            MP->eventFunct(eventActivateTrackEq, MP, &track, 0);
+            return;
+        }
     }
 }
 

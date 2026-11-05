@@ -10,6 +10,7 @@
 #include "core/titleBar.h"
 
 #include "imageViewer/imageViewer.h"
+#include "trackEq/trackEq.h"
 #include "instrumentEditor/instrumentEditor.h"
 #include "masterParams/masterParams.h"
 #include "patternEditor/patternEditor.h"
@@ -51,7 +52,7 @@ extern uint8_t isAudioOutMuted();
 //=======================================================================
 //=======================================================================
 
-const uint8_t Interface::modulesCount = 13;
+const uint8_t Interface::modulesCount = 14;
 const hModule Interface::modules[modulesCount] = {
     &projectEditor,    // 0
     &sampleImporter,   // 1
@@ -66,6 +67,7 @@ const hModule Interface::modules[modulesCount] = {
     &imageViewer,      // 10
     nullptr,           // 11
     &masterParams,     // 12
+    &trackEqEditor,    // 13
 };
 
 const uint8_t Interface::modulesButtonsCount = 11;
@@ -587,6 +589,12 @@ void interfaceEnvents(uint8_t event, void* param1, void* param2, void* param3)
         {
             mtInterface.deactivateModule((hModule)param1);
             mtInterface.activateModule(&imageViewer, param2 == nullptr ? 0 : *((uint8_t*)param2));
+            break;
+        }
+        case eventActivateTrackEq:
+        {
+            mtInterface.deactivateModule((hModule)param1);
+            mtInterface.activateModule(&trackEqEditor, param2 == nullptr ? 0 : *((uint8_t*)param2));
             break;
         }
         case eventToggleActiveModule:

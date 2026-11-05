@@ -521,6 +521,13 @@ void ProjectSave::saveProjectFinish()
 
     newFileManager.getPatternsMetadata()->copyPatternsMetadata(cWorkspacePatternsMetadataFilePath,
                                                                destFilePath);
+    //------------ track EQ
+    snprintf(destFilePath,
+             pathSize,
+             cProjectsTrackEqFileFormat,
+             newFileManager.getCurrentProjectPath(),
+             newFileManager.getCurrentProjectName());
+    newFileManager.getTrackEqStore()->copyFile(cWorkspaceTrackEqFilePath, destFilePath);
     //------------ synth patches
 
 #if FILEMANAGER_HANDLE_SYNTH == 1

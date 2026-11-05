@@ -30,6 +30,7 @@
 #include "simpleTextControl.h"
 #include "sliceControl.h"
 #include "songPlayerControl.h"
+#include "eqGraph.h"
 #include "spectrumControl.h"
 #include "startScreenControl.h"
 #include "textBoxControl.h"

@@ -51,6 +51,7 @@ void cFileManager::init(FileSystem* fileSystem, Synth* synth, bool stereoSampleM
 
     fileTransfer.init(fileSystem);
     patternsMetadata.init(fileSystem);
+    trackEqStore.init(fileSystem);
     FileManagerOperation::init(fileSystem);
 
     this->stereoSampleMode = stereoSampleMode;

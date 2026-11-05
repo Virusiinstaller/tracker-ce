@@ -275,6 +275,8 @@ enum interfaceEvents
 
     eventActivateTestingProcedure,
 
+    eventActivateTrackEq, // param1 = source module, param2 = track (uint8_t)
+
     interfaceEventsCount
 };
 
