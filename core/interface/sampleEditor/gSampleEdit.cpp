@@ -145,8 +145,8 @@ void cSampleEditor::initDisplayControls()
     backgroundLabelProperties.h = 54;
     bgLabel = display.createControl<cBgLabel>(&backgroundLabelProperties);
 
-    // EQ4 screen: graph, band columns and parameter columns (shared with the Track EQ)
-    eqPanel.create();
+    // EQ4 screen: graph, band columns and parameter columns (shared with the Track EQ, without the F5..F8 columns: not enough controls)
+    eqPanel.create(false);
 }
 
 void cSampleEditor::hideEqControls()
