@@ -25,6 +25,7 @@ struct strEqGraphData
     const trackeq::TrackEqParams* params = nullptr;
     int8_t selectedBand = 0;
     int8_t selectedParam = -1;
+    bool paramColumns = true; // the F5..F8 columns exist (and get a selection frame)
 };
 
 // Frequency response (20 Hz .. 20 kHz, log axis; +-15 dB) of a track EQ with a marker per band.
@@ -49,11 +50,12 @@ class cEqGraph : public cDisplayControl
 };
 
 // The whole EQ panel of the two EQ screens: graph + eight columns (F1..F4 bands, F5..F8 the
-// selected band's parameters) with the red selection frames. Needs 29 display controls.
+// selected band's parameters) with the red selection frames. Needs 29 display controls, or 21
+// without the parameter columns (the Sample Editor shows the parameters on its bottom labels).
 class cEqPanel
 {
   public:
-    void create(); // from initDisplayControls()
+    void create(bool parameterColumns); // from initDisplayControls()
     void show();
     void hide();
     // band = selected band, param = selected parameter or -1 (then only the band is framed)
@@ -77,6 +79,7 @@ class cEqPanel
     char values[4][16];
     strEqGraphData data;
     uint32_t colors[5];
+    bool paramColumns = true;
 };
 
 #endif
